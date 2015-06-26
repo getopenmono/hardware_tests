@@ -1,4 +1,4 @@
-TARGET = screen_blink_test
+TARGET = i2c_power_test
 ARCH="/usr/local/gcc-arm-none-eabi-4_8/bin/arm-none-eabi-"
 FLASH_SIZE=262144
 FLASH_ROW_SIZE=256

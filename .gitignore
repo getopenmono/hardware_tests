@@ -2,3 +2,4 @@
 */*.map
 *.xcodeproj
 *.plist
+*.elf
