@@ -9,9 +9,13 @@
 #ifndef __redpineTest__redpine_test__
 #define __redpineTest__redpine_test__
 
+extern "C" {
 #include <project.h>
+}
 #include <redpine_module.h>
 #include <SPI.h>
+#include <mbed.h>
+#include <consoles.h>
 
 class RedpineTest {
     

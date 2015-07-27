@@ -10,10 +10,7 @@
 
 void usbuart_test_init()
 {
-    CyGlobalIntEnable;
-    USBUART_Start(0, USBUART_3V_OPERATION);
-    while (!USBUART_GetConfiguration());
-    USBUART_CDC_Init();
+    
 }
 
 void usbuart_test_write(const char *str)

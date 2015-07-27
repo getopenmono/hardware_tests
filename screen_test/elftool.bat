@@ -1,0 +1,1 @@
+"C:\Program Files (x86)\Cypress\PSoC Creator\3.1\PSoC Creator\bin\cyelftool.exe" -B screen_test.elf --flash_size 262144 --flash_array_size 65535 --flash_row_size 256 --ee_array 64 --ee_row_size 16

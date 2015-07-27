@@ -1,4 +1,4 @@
-TARGET = redpine_test
+TARGET = screen_test
 ARCH="/usr/local/gcc-arm-none-eabi-4_8/bin/arm-none-eabi-"
 FLASH_SIZE=262144
 FLASH_ROW_SIZE=256
@@ -9,18 +9,24 @@ OPTIMIZATION = -O0
 CYPRESS_DIR=../../mono_buildsystem/Generated_Source/PSoC5
 LINKER_SCRIPT=${CYPRESS_DIR}/cm3gcc.ld
 BUILD_DIR=build
-MONO_CY_LIBRARY=../../mono_buildsystem/build/monoCyLib.a
-COMP_LIB="../../mono_buildsystem/lib/CyComponentLibrary.a"
+COMP_LIB="../../mono_buildystem/lib/CyComponentLibrary.a"
+MONO_CY_LIB=../../mono_buildsystem/build/monoCyLib.a
+MBED_PATH=../../mbedcomp
+MONO_FW_PATH=../../mono_framework
 
 OBJECTS =	$(patsubst %.c,%.o,$(wildcard *.c)) $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 
-MBED_OBJECTS = $(patsubst %.c,%.o,$(wildcard ../../mbedcomp/*.c)) $(patsubst %.cpp,%.o,$(wildcard ../../mbedcomp/*.cpp))
+MBED_OBJECTS =	$(patsubst %.c,%.o,$(wildcard $(MBED_PATH)/*.c)) \
+				$(patsubst %.cpp,%.o,$(wildcard $(MBED_PATH)/*.cpp))
 
-MONO_OBJECTS = $(patsubst %.cpp,%.o,$(wildcard ../../mono_framework/*.cpp)) $(patsubst %.cpp,%.o,$(wildcard ../../mono_framework/wireless/*.cpp)) \
-	$(patsubst %.cpp,%.o,$(wildcard ../../mono_framework/display/*.cpp))
+MONO_OBJECTS = 	$(patsubst %.cpp,%.o,$(wildcard $(MONO_FW_PATH)/*.cpp)) \
+				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FW_PATH)/display/*.cpp)) \
+				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FW_PATH)/display/ui/*.cpp)) \
+				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FW_PATH)/display/hx8340/*.cpp)) 
+#				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FW_PATH)/wireless/*.cpp)) 
 
-SYS_OBJECTS = 	$(patsubst %.c,%.o,$(wildcard $(CYPRESS_DIR)/*.c)) \
-				$(patsubst %.s,%.o,$(wildcard $(CYPRESS_DIR)/*Gnu.s))
+SYS_OBJECTS = 	$(patsubst %.c,%.o,$(wildcard Generated_Source/PSoC5/*.c)) \
+				$(patsubst %.s,%.o,$(wildcard Generated_Source/PSoC5/*Gnu.s))
 
 CC=$(ARCH)gcc
 CXX=$(ARCH)g++
@@ -34,13 +40,15 @@ OBJDUMP=$(ARCH)objdump
 COPY=cp
 MKDIR=mkdir
 ELFTOOL='C:\Program Files (x86)\Cypress\PSoC Creator\3.1\PSoC Creator\bin\cyelftool.exe'
-INCS = -I . \
-	 -I ../../mbedcomp \
-	 -I ../../mono_framework \
-	 -I ../../mono_framework/wireless \
-	 -I ../../mono_framework/display \
-	 -I ../../mono_framework/display/ui \
-	 -I ../../mono_buildsystem/include
+INCS =	-I . \
+	 	-I ${CYPRESS_DIR} \
+		-I $(MBED_PATH) \
+		-I $(MONO_FW_PATH) \
+		-I $(MONO_FW_PATH)/display \
+		-I $(MONO_FW_PATH)/display/ui \
+		-I $(MONO_FW_PATH)/display/hx8340 
+#		-I $(MONO_FW_PATH)/wireless
+	
 CDEFS=
 ASDEFS=
 AS_FLAGS = -c -g -Wall -mcpu=cortex-m3 -mthumb -mthumb-interwork -march=armv7-m
@@ -77,7 +85,8 @@ $(BUILD_DIR):
 
 $(TARGET).elf: $(OBJECTS) $(MBED_OBJECTS) $(MONO_OBJECTS)
 	@echo "Linking $(notdir $@)"
-	$(LD) -Wl,--start-group -o $@ $(addprefix $(BUILD_DIR)/, $(notdir $^)) $(MONO_CY_LIBRARY) -mthumb -march=armv7-m -mfix-cortex-m3-ldrd "-Wl,-Map,mono_project.map" -T $(LINKER_SCRIPT) -g -specs=nano.specs "-u\ _printf_float" $(LD_SYS_LIBS) -Wl,--gc-sections -Wl,--end-group
+	@$(LD) -Wl,--start-group -o $@ $(addprefix $(BUILD_DIR)/, $(notdir $^)) $(MONO_CY_LIB) -mthumb -march=armv7-m -mfix-cortex-m3-ldrd "-Wl,-Map,mono_project.map" -T $(LINKER_SCRIPT) -g -specs=nano.specs "-u\ _printf_float" $(LD_SYS_LIBS) -Wl,--gc-sections -Wl,--end-group
+#	@$(OBJCOPY) -R .cyloadablemeta --add-section .cyloadablemeta=meta $(TARGET).elf
 
 $(TARGET).hex: $(TARGET).elf
 	$(ELFTOOL) -C $^ --flash_size $(FLASH_SIZE) --flash_row_size $(FLASH_ROW_SIZE)
@@ -104,12 +113,12 @@ appFiles:
 	
 mbedFiles:
 	@echo $(MBED_OBJECTS)
-
+	
 monoFiles:
 	@echo $(MONO_OBJECTS)
 
 clean:
-	$(RM) $(addprefix $(BUILD_DIR)/, $(notdir $(OBJECTS))) $(addprefix $(BUILD_DIR)/, $(notdir $(SYS_OBJECTS))) $(TARGET).elf $(TARGET).bin
+	$(RM) $(addprefix $(BUILD_DIR)/, $(notdir $(OBJECTS))) $(addprefix $(BUILD_DIR)/, $(notdir $(SYS_OBJECTS))) $(TARGET).elf $(TARGET).bin include/* lib/monoCyLib.a
 
 summary: $(TARGET).elf
 	$(ELFTOOL) -S $(TARGET).elf
