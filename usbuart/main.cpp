@@ -1,27 +1,44 @@
 #include <mono.h>
 #include <mbed.h>
+#include <redpine_module.h>
+
+class AppCtrl : public mono::IApplication {
+    
+    mbed::SPI rpSpi;
+    mono::redpine::ModuleSPICommunication comm;
+    
+public:
+    
+    AppCtrl() : mono::IApplication(), rpSpi(RP_SPI_MOSI, RP_SPI_MISO, RP_SPI_CLK), comm(rpSpi, RP_SPI_CS,NC)
+    {
+        
+    }
+    
+    void monoWakeFromReset()
+    {
+        
+        
+        int num = 0;
+        while (1) {
+            mono::defaultSerial.printf("hej med dig %i\n\r",num++);
+            
+            mbed::wait_ms(100);
+        }
+    }
+    void monoWillGotoSleep()
+    {
+    }
+    void monoWakeFromSleep()
+    {}
+};
 
 int main()
 {
     
+    AppCtrl app;
     
-//    USBUART_Start(0, USBUART_DWR_VDDD_OPERATION);
-//    while(!USBUART_GetConfiguration());
-//    USBUART_CDC_Init();
+    mono::IApplicationContext::Instance->setMonoApplication(&app);
     
-    int num = 1;
-    while (1) {
-        
-        //USBUART_PutString("test");
-        
-        mono::defaultSerial.printf("hej med dig %i\n\r",num++);
-        
-        mbed::wait_ms(1000);
-    }
-    
-    
-    
-	
 	
 	return 0;
 }
