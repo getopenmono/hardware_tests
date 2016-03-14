@@ -15,7 +15,7 @@ DownloadController::DownloadController(ui::ConsoleView<176, 110> *con) :
     byteCount(geo::Rect(10,180,70,20), "0"),
     errorCount(geo::Rect(120,180,50,20), "0")
 {
-    url  = "http://10.0.41.1/";
+    url  = "http://10.0.0.7/";
     
     console = con;
     active =  false;
@@ -37,7 +37,7 @@ void DownloadController::staticIP(redpine::Module::StaticIPParams *params)
 void DownloadController::wifiConnect()
 {
     redpine::Module::initialize(&comm);
-    //redpine::Module::setStaticIPCallback<DownloadController>(this, &DownloadController::staticIP);
+    redpine::Module::setStaticIPCallback<DownloadController>(this, &DownloadController::staticIP);
 
 //    redpine::Module::setNetworkReadyCallback<DownloadController>(this, &DownloadController::wifiConnected);
 //
